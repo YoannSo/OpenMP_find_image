@@ -1,0 +1,2 @@
+/main img/beach.png img/goat.png 
+gcc main.c -o main -lm

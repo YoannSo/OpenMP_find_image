@@ -3,7 +3,8 @@
 #include "lib_stb_image/stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "lib_stb_image/stb_image_write.h"
-
+void getPetiteImage(int x,int y,unsigned char *imgSource, int inputImgWidth, int inputImgHeight, unsigned char *searchImg, int searchImgWidth, int searchImgHeigh);
+void findImage(int* x,int* y,unsigned char *imgSource, int inputImgWidth, int inputImgHeight, unsigned char *searchImg, int searchImgWidth, int searchImgHeigh);
 int main (int argc, char *argv[])
 {
     if (argc != 3)
@@ -44,9 +45,7 @@ int main (int argc, char *argv[])
     // ====================================  Save example: save a copy of 'inputImg'
     unsigned char *saveExample = (unsigned char *)malloc(inputImgWidth * inputImgHeight * 3 * sizeof(unsigned char));
     memcpy( saveExample, inputImg, inputImgWidth * inputImgHeight * 3 * sizeof(unsigned char) );
-
     stbi_write_png("img/save_example.png", inputImgWidth, inputImgHeight, 3, saveExample, inputImgWidth * 3);
-
     free(saveExample);
     stbi_image_free(inputImg); 
     stbi_image_free(searchImg); 
@@ -54,4 +53,34 @@ int main (int argc, char *argv[])
     printf("Good bye!\n");
 
     return EXIT_SUCCESS;
+}
+unsigned char* getPetiteImage(int x,int y,unsigned char *imgSource, int inputImgWidth, int inputImgHeight, unsigned char *searchImg, int searchImgWidth, int searchImgHeigh){
+    if (x+searchImgWidth>inputImgWidth){
+        return NULL;    
+    } else if (y+searchImgHeigh>inputImgHeight)
+    {
+        return NULL;
+    } else {
+        // Malloc de l'image
+        unsigned char * newImage;
+        for(int j=y;j<y+searchImgHeigh;j++){
+            for(int i=x;i<x+searchImgHeigh;i++){
+                printf("ca marche pas");
+            }
+        }
+    }
+    
+}
+
+void findImage(int* x,int* y,unsigned char *imgSource, int inputImgWidth, int inputImgHeight, unsigned char *searchImg, int searchImgWidth, int searchImgHeigh){
+    for (int j=0;j<inputImgHeight;j++){
+        for (int i=0;i<inputImgWidth;i++){
+            unsigned char * petiteImage = getPetiteImage(i,j,imgSource,inputImgWidth,inputImgHeight,searchImg,searchImgWidth,searchImgHeigh);
+            if (!isnull(petiteImage)){
+                x=i;
+                y=j;
+                return;
+            }
+        }
+    }
 }
