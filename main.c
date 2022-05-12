@@ -60,10 +60,10 @@ int main (int argc, char *argv[])
 
     searchGrey=rgb_to_grey(searchImg,searchImgHeight*searchImgWidth*3);
 
-    findImage(inputImg,inputImgWidth,inputImgHeight,searchImg,searchImgWidth,searchImgHeight);
+    findImage(inputGrey,inputImgWidth,inputImgHeight,searchGrey,searchImgWidth,searchImgHeight);
     // ====================================  Save example: save a copy of 'inputImg'
      unsigned char *saveExample = (unsigned char *)malloc(inputImgWidth * inputImgHeight  * 3*sizeof(unsigned char));
-    memcpy( saveExample, inputImg, inputImgWidth * inputImgHeight*3  * sizeof(unsigned char) );
+    memcpy( saveExample, inputGrey, inputImgWidth * inputImgHeight*3  * sizeof(unsigned char) );
 
     stbi_write_png("img/save_example.png", inputImgWidth, inputImgHeight, 3, saveExample, inputImgWidth * 3);
 
