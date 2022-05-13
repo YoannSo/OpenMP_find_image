@@ -16,7 +16,6 @@ int main (int argc, char *argv[])
         printf("Invalid arguments !\n");
         return EXIT_FAILURE;
     }
-    printf("lol\n");
     // Get image paths from arguments.
     const char *inputImgPath = argv[1];
     const char *searchImgPath = argv[2];

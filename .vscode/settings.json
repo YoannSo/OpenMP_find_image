@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "workcode.h": "c",
+        "stb_image_write.h": "c"
+    }
+}
