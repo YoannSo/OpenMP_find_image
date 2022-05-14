@@ -1,0 +1,13 @@
+
+prog:6280 terminated with signal 11 at PC=7efce8961995 SP=7ffecd816048.  Backtrace:
+/lib/x86_64-linux-gnu/libc.so.6(+0x1a0995)[0x7efce8961995]
+/lib/x86_64-linux-gnu/libmpich.so.12(+0x2177c6)[0x7efce8c007c6]
+/lib/x86_64-linux-gnu/libmpich.so.12(+0x260e01)[0x7efce8c49e01]
+/lib/x86_64-linux-gnu/libmpich.so.12(+0x20b5a89)[0x7efceaa9ea89]
+/lib/x86_64-linux-gnu/libmpich.so.12(+0x20b60f1)[0x7efceaa9f0f1]
+/lib/x86_64-linux-gnu/libmpich.so.12(PMPI_Send+0x481)[0x7efce8afe041]
+./prog(+0x211b1)[0x55a2bf9361b1]
+./prog(+0x20fd3)[0x55a2bf935fd3]
+/lib/x86_64-linux-gnu/libc.so.6(+0x29d90)[0x7efce87ead90]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x80)[0x7efce87eae40]
+./prog(+0x1445)[0x55a2bf916445]

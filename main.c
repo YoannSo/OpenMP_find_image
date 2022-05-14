@@ -61,7 +61,7 @@ int main (int argc, char *argv[])
     searchGrey=rgb_to_grey(searchImg,searchImgHeight*searchImgWidth*3);
 
     findImage(inputGrey,inputImgWidth,inputImgHeight,searchGrey,searchImgWidth,searchImgHeight,&i,&j);
-
+    printf("%d %d  \n",i,j);
     encadrerEnRouge(i,j,inputImg,inputImgWidth,inputImgHeight,searchImgWidth,searchImgHeight);
 
     // ====================================  Save example: save a copy of 'inputImg'
@@ -123,6 +123,7 @@ int*  findImage(unsigned char *imgSource, int inputImgWidth, int inputImgHeight,
     if(indiceI!=-1){
         *resultI=indiceI;
         *resultJ=indiceJ;
+        printf("la dif %d",differenceMin);
     }
 }
 
