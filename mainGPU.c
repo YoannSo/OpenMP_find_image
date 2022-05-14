@@ -59,26 +59,26 @@ int main (int argc, char *argv[])
     int tranche=tailleATraiter;
     int moitieH=inputImgHeight*0.5;
     int moitieW=inputImgWidth*0.5;
-    unsigned char *inputGrey = (unsigned char *)malloc(inputImgHeight*inputImgWidth*3  * sizeof(unsigned char));
-    unsigned char *searchGrey = (unsigned char *)malloc(searchImgHeight*searchImgWidth*3  * sizeof(unsigned char));
+
+    unsigned char *inputGrey = (unsigned char *)malloc(inputImgHeight*inputImgWidth * sizeof(unsigned char));
+    unsigned char *searchGrey = (unsigned char *)malloc(searchImgHeight*searchImgWidth  * sizeof(unsigned char));
     inputGrey=rgb_to_grey(inputImg,inputImgHeight*inputImgWidth*3);
 
     searchGrey=rgb_to_grey(searchImg,searchImgHeight*searchImgWidth*3);
-
-    unsigned char *hg = (unsigned char *)malloc((moitieW+searchImgWidth)*(moitieH+searchImgHeight)*3  * sizeof(unsigned char));
-    unsigned char *hd = (unsigned char *)malloc((moitieW)*(moitieH+searchImgHeight)*3  * sizeof(unsigned char));
-    unsigned char *bg = (unsigned char *)malloc((moitieW+searchImgWidth)*(moitieH)*3  * sizeof(unsigned char));
-    unsigned char *bd = (unsigned char *)malloc((moitieW)*(moitieH)*3  * sizeof(unsigned char));
+    unsigned char *hg = (unsigned char *)malloc((moitieW+searchImgWidth)*(moitieH+searchImgHeight)  * sizeof(unsigned char));
+    unsigned char *hd = (unsigned char *)malloc((moitieW)*(moitieH+searchImgHeight)  * sizeof(unsigned char));
+    unsigned char *bg = (unsigned char *)malloc((moitieW+searchImgWidth)*(moitieH)  * sizeof(unsigned char));
+    unsigned char *bd = (unsigned char *)malloc((moitieW)*(moitieH)  * sizeof(unsigned char));
 
     hg=getPetiteImage(0,0,inputGrey,inputImgWidth,inputImgHeight,searchGrey,moitieW+searchImgWidth,moitieH+searchImgHeight);
     hd=getPetiteImage(0,moitieW,inputGrey,inputImgWidth,inputImgHeight,searchGrey,moitieW,moitieH+searchImgHeight);
     bg=getPetiteImage(moitieH,0,inputGrey,inputImgWidth,inputImgHeight,searchGrey,moitieW+searchImgWidth,moitieH);
     bd=getPetiteImage(moitieH,moitieW,inputGrey,inputImgWidth,inputImgHeight,searchGrey,moitieW,moitieH);
 
-    #pragma omp parallel sections
-    {
-            printf("%d \n",omp_get_num_threads());
-        #pragma omp section
+   // #pragma omp parallel sections
+    //{
+           // printf("%d \n",omp_get_num_threads());
+        /*#pragma omp section
              {
             int i;
             int j;
@@ -96,17 +96,19 @@ int main (int argc, char *argv[])
         encadrerEnRouge(i,j+moitieW,inputGrey,inputImgWidth,inputImgHeight,searchImgWidth,searchImgHeight);
 
 
-        }
-        #pragma omp section
-        {    int i;
+        }*/
+        //#pragma omp parallel
+        //{    
+
+            int i;
             int j;
             test(bg,(moitieW+searchImgWidth),(moitieH),searchGrey,searchImgWidth,searchImgHeight,&i,&j);
                         printf("3- %d %d \n",i,j);
                                 encadrerEnRouge(i+moitieH,j,inputGrey,inputImgWidth,inputImgHeight,searchImgWidth,searchImgHeight);
 
 
-        }
-        #pragma omp section
+        //}
+        /*#pragma omp section
         {int i;
             int j;
             test(bd,(moitieW),(moitieH),searchGrey,searchImgWidth,searchImgHeight,&i,&j);
@@ -114,8 +116,8 @@ int main (int argc, char *argv[])
                                 encadrerEnRouge(i+moitieH,j+moitieW,inputGrey,inputImgWidth,inputImgHeight,searchImgWidth,searchImgHeight);
 
 
-        }
-    }
+        }*/
+   // }
 
 
 
@@ -135,16 +137,13 @@ int main (int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 unsigned char* getPetiteImage(int x,int y,unsigned char *imgSource, int inputImgWidth, int inputImgHeight, unsigned char *searchImg, int searchImgWidth, int searchImgHeight){
-   unsigned char * petiteImage=(unsigned char *)malloc(searchImgWidth*searchImgHeight*3  * sizeof(unsigned char));
+   unsigned char * petiteImage=(unsigned char *)malloc(searchImgWidth*searchImgHeight  * sizeof(unsigned char));
    int indexInPetiteImage=0;
-   //#pragma omp parallel for
    for(int i=x;i<x+searchImgHeight;i++){
        for(int j=y;j<y+searchImgWidth;j++){
-           int index=(i*inputImgWidth+j)*3;
+           int index=i*inputImgWidth+j;
            petiteImage[indexInPetiteImage]=imgSource[index];
-           petiteImage[indexInPetiteImage+1]=imgSource[index+1];
-           petiteImage[indexInPetiteImage+2]=imgSource[index+2];
-           indexInPetiteImage+=3;
+           indexInPetiteImage++;
        }
    }
     return petiteImage;
@@ -152,51 +151,19 @@ unsigned char* getPetiteImage(int x,int y,unsigned char *imgSource, int inputImg
 }
 int compareImage(unsigned char *img1,unsigned char *img2,int height, int width){
     int difference =0;
-    for(int i=0;i<height*width*3;i+=3){
+    for(int i=0;i<height*width;i++){
         difference+=(img1[i]-img2[i])*(img1[i]-img2[i]);
     }
     return difference;
 }
-int*  findImage(int debutW,int debutH,int moitieW,int moitieH,unsigned char *imgSource, int inputImgWidth, int inputImgHeight, unsigned char *searchImg, int searchImgWidth, int searchImgHeight,int * resultI,int* resultJ){
-    int* indiceI=-1;
-    int* indiceJ=-1;
-    int differenceMin=9999999999;
-    #pragma omp for schedule(dynamic)
-    for (int i=debutH;i<debutH+moitieH;i++){
-        //printf("%d \n",i);
-        for(int j=debutW;j<debutW+moitieW;j++){
-            if(inputImgHeight-i>=searchImgHeight && inputImgWidth-j>=searchImgWidth ){
-                unsigned char * petiteImage = getPetiteImage(i,j,imgSource,inputImgWidth,inputImgHeight,searchImg,searchImgWidth,searchImgHeight);
-                int differenceCourante=compareImage(petiteImage,searchImg,searchImgHeight,searchImgWidth);
-                if(differenceCourante<differenceMin){
-                                
-                    differenceMin=differenceCourante;
-                    indiceJ=j;
-                    indiceI=i;
-                } 
-                free(petiteImage);
-            }
-                        
 
-        }
-
-    }
-    if(indiceI!=-1){
-        resultI=indiceI;
-        resultJ=indiceJ;
-                printf("%d %d \n",resultI,resultJ);
-
-            encadrerEnRouge(indiceI,indiceJ,imgSource,inputImgWidth,inputImgHeight,searchImgWidth,searchImgHeight);
-
-    }
-}
 int*  test(unsigned char *imgSource, int inputImgWidth, int inputImgHeight, unsigned char *searchImg, int searchImgWidth, int searchImgHeight,int* resultI,int* resultJ){
     int indiceI=-1;
     int indiceJ=-1;
     int differenceMin=9999999999;
     #pragma omp for schedule(dynamic)
     for (int i=0;i<inputImgHeight;i++){
-        //printf("%d \n",i);
+        printf("%d \n",i);
         for(int j=0;j<inputImgWidth;j++){
             if(inputImgHeight-i>=searchImgHeight && inputImgWidth-j>=searchImgWidth ){
                 unsigned char * petiteImage = getPetiteImage(i,j,imgSource,inputImgWidth,inputImgHeight,searchImg,searchImgWidth,searchImgHeight);
@@ -226,11 +193,10 @@ unsigned char * rgb_to_grey(unsigned char* input_rgb,int size){
     unsigned char *grey_opti=(unsigned char *)malloc(size   * sizeof(unsigned char));
          int indexGrey=0;
     for(int i=0;i<size;i+=3){
+        
         float value=0.299*input_rgb[i]+0.587*input_rgb[i+1]+0.114*input_rgb[i+2];
             grey_opti[indexGrey]=value;
-            grey_opti[indexGrey+1]=value;
-            grey_opti[indexGrey+2]=value;
-            indexGrey+=3;
+            indexGrey++;
     }
     return grey_opti;
 }
