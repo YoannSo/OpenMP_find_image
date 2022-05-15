@@ -231,7 +231,6 @@ int*  findImage(int idLine,unsigned char *imgSource, int inputImgWidth, int inpu
     int indiceJ=-1;
     int differenceMin=9999999999;
     int indices [2];
-        
         for(int j=0;j<inputImgWidth;j++){
             if(inputImgHeight-idLine>=searchImgHeight && inputImgWidth-j>=searchImgWidth ){
                 unsigned char * petiteImage = getPetiteImage(idLine,j,imgSource,inputImgWidth,inputImgHeight,searchImg,searchImgWidth,searchImgHeight);
