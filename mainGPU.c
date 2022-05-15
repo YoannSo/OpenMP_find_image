@@ -8,13 +8,13 @@
 #define NBCOEURS 4
 
 unsigned char* getPetiteImage(int x,int y,unsigned char *imgSource, int inputImgWidth, int inputImgHeight, unsigned char *searchImg, int searchImgWidth, int searchImgHeight);
-int* findImage(int debutW,int debutH,int moitieW,int moitieH,unsigned char *imgSource, int inputImgWidth, int inputImgHeight, unsigned char *searchImg, int searchImgWidth, int searchImgHeight,int* resultI,int* resultJ);
+int*  findImage(int idLine,unsigned char *imgSource, int inputImgWidth, int inputImgHeight, unsigned char *searchImg, int searchImgWidth, int searchImgHeight,int* result);
 int*  test(unsigned char *imgSource, int inputImgWidth, int inputImgHeight, unsigned char *searchImg, int searchImgWidth, int searchImgHeight,int* result);
 unsigned char * rgb_to_grey(unsigned char* input,int size);
 unsigned char* optiGrey_to_greyImage(unsigned char *input,int width,int height);
 int compareImage(unsigned char *img1,unsigned char *img2,int height, int width);
 unsigned char * encadrerEnRouge(int x,int y,unsigned char* input,int inputWidth,int inputHeight,int searchWidth,int searchHeight);
-int* finalresult;
+
 int main (int argc, char *argv[])
 {
     if (argc != 3)
@@ -43,11 +43,7 @@ int main (int argc, char *argv[])
     int nbValueGrey=inputImgWidth*inputImgHeight;
     unsigned char *greyOpti = (unsigned char *)malloc(nbValueRgb  * sizeof(unsigned char));
 
-   // unsigned char *greyImage = (unsigned char *)malloc(nbValueRgb  * sizeof(unsigned char));
-
-   // greyOpti=rgb_to_grey(inputImg,nbValueGrey,nbValueRgb);
-    //greyImage=optiGrey_to_greyImage(greyOpti,nbValueGrey,nbValueRgb);
-    // ====================================  Loading search image.
+ 
     int searchImgWidth;
     int searchImgHeight;
     unsigned char *searchImg = stbi_load(searchImgPath, &searchImgWidth, &searchImgHeight, &dummyNbChannels, 3);
@@ -58,84 +54,50 @@ int main (int argc, char *argv[])
     }
     printf("Search image %s: %dx%d\n", searchImgPath, searchImgWidth, searchImgHeight);
 
-    int tailleATraiter=(inputImgWidth-searchImgWidth)*(inputImgHeight*searchImgHeight);
-    int tranche=tailleATraiter;
-    int moitieH=inputImgHeight*0.5;
-    int moitieW=inputImgWidth*0.5;
-
     unsigned char *inputGrey = (unsigned char *)malloc(inputImgHeight*inputImgWidth * sizeof(unsigned char));
     unsigned char *searchGrey = (unsigned char *)malloc(searchImgHeight*searchImgWidth  * sizeof(unsigned char));
     inputGrey=rgb_to_grey(inputImg,inputImgHeight*inputImgWidth);
 
     searchGrey=rgb_to_grey(searchImg,searchImgHeight*searchImgWidth);
-    unsigned char *hg = (unsigned char *)malloc((moitieW+searchImgWidth)*(moitieH+searchImgHeight)  * sizeof(unsigned char));
-    unsigned char *hd = (unsigned char *)malloc((moitieW)*(moitieH+searchImgHeight)  * sizeof(unsigned char));
-    unsigned char *bg = (unsigned char *)malloc((moitieW+searchImgWidth)*(moitieH)  * sizeof(unsigned char));
-    unsigned char *bd = (unsigned char *)malloc((moitieW)*(moitieH)  * sizeof(unsigned char));
 
-    hg=getPetiteImage(0,0,inputGrey,inputImgWidth,inputImgHeight,searchGrey,moitieW+searchImgWidth,moitieH+searchImgHeight);
-    hd=getPetiteImage(0,moitieW,inputGrey,inputImgWidth,inputImgHeight,searchGrey,moitieW,moitieH+searchImgHeight);
-    bg=getPetiteImage(moitieH,0,inputGrey,inputImgWidth,inputImgHeight,searchGrey,moitieW+searchImgWidth,moitieH);
-    bd=getPetiteImage(moitieH,moitieW,inputGrey,inputImgWidth,inputImgHeight,searchGrey,moitieW,moitieH);
 
-                int finalResult[NBCOEURS][3];
-
-   #pragma omp parallel sections
+    int tailleATraiter=(inputImgWidth-searchImgWidth)*(inputImgHeight*searchImgHeight);
+    int tranche=tailleATraiter;
+    int moitieH=inputImgHeight*0.5;
+    int moitieW=inputImgWidth*0.5;
+    int result [inputImgHeight][3];
+    int nbLigneAFaire=inputImgHeight;
+   
+    #pragma omp parallel sections
     {   
-        
+        omp_set_num_threads(6);
             
             
         #pragma omp section
-             {
-            int result[3];
-            test(hg,(moitieW+searchImgWidth),(moitieH+searchImgHeight),searchGrey,searchImgWidth,searchImgHeight,&result[0]);
-            finalResult[omp_get_thread_num()][0]=result[0];       
-            finalResult[omp_get_thread_num()][1]=result[1]; 
-            finalResult[omp_get_thread_num()][2]=result[2]; 
+            {
+
+            for(int i=0;i<nbLigneAFaire;i++){
+                #pragma omp task
+                {
+                    int resultCourant[3];
+                    findImage(i,inputGrey,inputImgWidth,inputImgHeight,searchGrey,searchImgWidth,searchImgHeight,&resultCourant[0]);
+                    result[i][0]=resultCourant[0];
+                    result[i][1]=resultCourant[1];
+                    result[i][2]=resultCourant[2];
+                }
+            }
+            
+            
         }
-        #pragma omp section
-        {
-            int result[3];
-            test(hd,(moitieW),(moitieH+searchImgHeight),searchGrey,searchImgWidth,searchImgHeight,&result[0]);
-            finalResult[omp_get_thread_num()][0]=result[0];       
-            finalResult[omp_get_thread_num()][1]=result[1]; 
-            finalResult[omp_get_thread_num()][2]=result[2]+moitieW; 
-
-        }
-        #pragma omp section
-        {    
-
-            int result[3];
-            test(bg,(moitieW+searchImgWidth),(moitieH),searchGrey,searchImgWidth,searchImgHeight,&result[0]);
-            finalResult[omp_get_thread_num()][0]=result[0];       
-            finalResult[omp_get_thread_num()][1]=result[1]+moitieH; 
-            finalResult[omp_get_thread_num()][2]=result[2];      
-
-
-        }
-        #pragma omp section
-        {
-            int result[3];
-            test(bd,(moitieW),(moitieH),searchGrey,searchImgWidth,searchImgHeight,&result[0]);
-            finalResult[omp_get_thread_num()][0]=result[0];       
-            finalResult[omp_get_thread_num()][1]=result[1]+moitieH; 
-            finalResult[omp_get_thread_num()][2]=result[2]+moitieW; 
-
-        }
+       
     }
 
+    
+    
+    
+   printf("%d",result[0][2]);
 
-    int minDiff=finalResult[0][0];
-    int minI=finalResult[0][1];
-    int minJ=finalResult[0][2];
-    for(int i=1;i<NBCOEURS;i++){
-        if(finalResult[i][0]<minDiff){
-            minDiff=finalResult[i][0];
-            minI=finalResult[i][1];
-            minJ=finalResult[i][2];
-        }
-    }
-    encadrerEnRouge(minI,minJ,inputImg,inputImgWidth,inputImgHeight,searchImgWidth,searchImgHeight);
+   
 
     // ====================================  Save example: save a copy of 'inputImg'
      unsigned char *saveExample = (unsigned char *)malloc(inputImgWidth * inputImgHeight  * 3*sizeof(unsigned char));
@@ -199,7 +161,6 @@ int*  test(unsigned char *imgSource, int inputImgWidth, int inputImgHeight, unsi
 
     }
      if(indiceI!=-1){
-        printf(" fin %d %d \n",indiceI,indiceJ);
         result[0]=differenceMin;
         result[1]=indiceI;
         result[2]=indiceJ;
@@ -257,4 +218,35 @@ unsigned char* optiGrey_to_greyImage(unsigned char *input_grey,int nbValueGrey,i
         j+=3;
     }
     return grey_img;
+}
+int*  findImage(int idLine,unsigned char *imgSource, int inputImgWidth, int inputImgHeight, unsigned char *searchImg, int searchImgWidth, int searchImgHeight,int* result){
+    int indiceI=-1;
+    int indiceJ=-1;
+    int differenceMin=9999999999;
+    int indices [2];
+        for(int j=0;j<inputImgWidth;j++){
+            if(inputImgHeight-idLine>=searchImgHeight && inputImgWidth-j>=searchImgWidth ){
+                unsigned char * petiteImage = getPetiteImage(idLine,j,imgSource,inputImgWidth,inputImgHeight,searchImg,searchImgWidth,searchImgHeight);
+                int differenceCourante=compareImage(petiteImage,searchImg,searchImgHeight,searchImgWidth);
+                if(idLine==81 && j==664){
+                }
+                if(differenceCourante<differenceMin){
+                    differenceMin=differenceCourante;
+                    indiceJ=j;
+                    indiceI=idLine;
+                } 
+                free(petiteImage);
+            }
+                        
+
+        }
+
+    
+    if(indiceI!=-1){
+        result[0]=differenceMin;
+        result[1]=indiceI;
+        result[2]=indiceJ;
+
+
+    }
 }
