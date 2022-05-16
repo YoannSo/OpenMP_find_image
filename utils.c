@@ -16,10 +16,9 @@ unsigned char* getGrey(const  char* path,int* width,int* height)
     if (inputImg == NULL)
     {
         printf("Cannot load image %s", path);
-        return EXIT_FAILURE;
+        return NULL;
     }
     printf("Input image %s: %dx%d\n", path, inputImgWidth, inputImgHeight);
-        printf("lol");
 
     unsigned char* inGrey = (unsigned char *)malloc(inputImgHeight*inputImgWidth * sizeof(unsigned char));
 
@@ -38,10 +37,9 @@ unsigned char* getNormal(const  char* path,int* width,int* height)
     if (inputImg == NULL)
     {
         printf("Cannot load image %s", path);
-        return EXIT_FAILURE;
+        return NULL;
     }
     printf("Input image %s: %dx%d\n", path, inputImgWidth, inputImgHeight);
-        printf("lol");
 
 
     *width=inputImgWidth;
@@ -78,10 +76,10 @@ int compareImage(unsigned char *img1,unsigned char *img2,int height, int width){
     return difference;
 }
 
-int*  test(unsigned char *imgSource, int inputImgWidth, int inputImgHeight, unsigned char *searchImg, int searchImgWidth, int searchImgHeight,int*  result){
+void  test(unsigned char *imgSource, int inputImgWidth, int inputImgHeight, unsigned char *searchImg, int searchImgWidth, int searchImgHeight,int*  result){
     int indiceI=-1;
     int indiceJ=-1;
-    int differenceMin=9999999999;
+    int differenceMin=999999999;
     for (int i=0;i<inputImgHeight;i++){
         for(int j=0;j<inputImgWidth;j++){
             if(inputImgHeight-i>=searchImgHeight && inputImgWidth-j>=searchImgWidth ){
@@ -146,10 +144,10 @@ unsigned char * encadrerEnRouge(int x,int y,unsigned char* input,int inputWidth,
         input[index+2]=0;
      }
 }
-int*  findImageInImage(unsigned char *imgSource, int inputImgWidth, int inputImgHeight, unsigned char *searchImg, int searchImgWidth, int searchImgHeight,int* resultI,int* resultJ){
+void findImageInImage(unsigned char *imgSource, int inputImgWidth, int inputImgHeight, unsigned char *searchImg, int searchImgWidth, int searchImgHeight,int* resultI,int* resultJ){
     int indiceI=-1;
     int indiceJ=-1;
-    int differenceMin=9999999999;
+    int differenceMin=999999999;
     int indices [2];
     for (int i=0;i<inputImgHeight;i++){
         for(int j=0;j<inputImgWidth;j++){
@@ -171,6 +169,5 @@ int*  findImageInImage(unsigned char *imgSource, int inputImgWidth, int inputImg
     if(indiceI!=-1){
         *resultI=indiceI;
         *resultJ=indiceJ;
-        printf("la dif %d",differenceMin);
     }
 }

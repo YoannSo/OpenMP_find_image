@@ -1,5 +1,7 @@
 #include "utils.h"
 #include <stdio.h>
+#include <stdlib.h>
+
 int main (int argc, char *argv[])
 {
     if (argc != 3)
@@ -16,19 +18,24 @@ int main (int argc, char *argv[])
 
     int inputWidth,inputHeight,searchWidth,searchHeight;
     unsigned char* inputNormal=getNormal(inputImgPath,&inputWidth,&inputHeight);
+    if(inputNormal==NULL){
+        return 1;
+    }
     unsigned char *inputGrey=getGrey(inputImgPath,&inputWidth,&inputHeight);
+    if(inputGrey==NULL){
+        return 1;
+    }
     unsigned char *searchGrey=getGrey(searchImgPath,&searchWidth,&searchHeight);
-
-    printf("%d %d %d %d\n",inputNormal[5],searchGrey[10],inputGrey[0]);
-
+    if(searchGrey==NULL){
+        return 1;
+    }
     int i,j;
     findImageInImage(inputGrey,inputWidth,inputHeight,searchGrey,searchWidth,searchHeight,&i,&j);
-    printf("%d %d  \n",i,j);
     encadrerEnRouge(i,j,inputNormal,inputWidth,inputHeight,searchWidth,searchHeight);
 
     save(inputNormal,inputWidth,inputHeight);
-   
 
-
-    return 1;
+    free(searchGrey);
+    free(inputGrey);
+    return 0;
 }
